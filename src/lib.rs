@@ -82,6 +82,18 @@ impl<G: Problem> Solutions<G> {
             current,
         }
     }
+
+    /// Unwinds `history`/`current` until `history.len()` equals `target_depth - 1` — one move
+    /// behind the candidate about to be played at `target_depth`. This simulates the stack frames
+    /// a recursive implementation would have unwound automatically; isolated here to keep that
+    /// concern separate from the rest of `next()`'s algorithm skeleton.
+    #[inline]
+    fn rewind_to(&mut self, target_depth: i32) {
+        for _ in 0..self.history.len() as i32 - target_depth + 1 {
+            let last = self.history.pop().unwrap();
+            self.current.undo(&last, &self.history);
+        }
+    }
 }
 
 /// Explores the independent branches rooted at each of the initial possibilities of `init` in
@@ -120,10 +132,7 @@ impl<G: Problem> Iterator for Solutions<G> {
             // Unroll all the moves until our current state is identical with the one which we
             // had once we put that mov into the open list. We want to be one move behind so
             // we need to play the move in order to get the desired state
-            for _ in 0..self.history.len() as i32 - count + 1 {
-                let last = self.history.pop().unwrap();
-                self.current.undo(&last, &self.history);
-            }
+            self.rewind_to(count);
 
             // We advance one move deeper into the search tree
             self.current.what_if(mov.clone());
