@@ -70,6 +70,7 @@ impl<G: Problem> Solutions<G> {
     /// Restricts the initial search frontier to a single possibility, leaving the rest of the
     /// tree walk identical to [`Solutions::new`]. Used to partition the root of the search tree
     /// into independent branches, e.g. for [`parallel_solutions`].
+    #[cfg(feature = "parallel")]
     fn seeded(current: G, first: G::Possibility) -> Self {
         Self {
             decisions: Vec::new(),
