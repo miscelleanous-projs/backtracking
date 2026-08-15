@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --all-targets --verbose
     - name: Run knights-journey
       run: cargo run --example knights_journey --release
     - name: Run sudoku

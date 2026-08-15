@@ -143,7 +143,7 @@ impl Problem for Sudoku {
 
 #[cfg(test)]
 mod tests {
-    use crate::lib::Game;
+    use backtracking::Problem;
 
     use super::{Sudoku, WriteDigit};
 
@@ -171,15 +171,15 @@ mod tests {
     fn print_with_first_row_filled() {
         let mut out = Vec::new();
         let mut game = Sudoku::new();
-        game.play_move(WriteDigit { index: 0, digit: 1 });
-        game.play_move(WriteDigit { index: 1, digit: 2 });
-        game.play_move(WriteDigit { index: 2, digit: 3 });
-        game.play_move(WriteDigit { index: 3, digit: 4 });
-        game.play_move(WriteDigit { index: 4, digit: 5 });
-        game.play_move(WriteDigit { index: 5, digit: 6 });
-        game.play_move(WriteDigit { index: 6, digit: 7 });
-        game.play_move(WriteDigit { index: 7, digit: 8 });
-        game.play_move(WriteDigit { index: 8, digit: 9 });
+        game.what_if(WriteDigit { index: 0, digit: 1 });
+        game.what_if(WriteDigit { index: 1, digit: 2 });
+        game.what_if(WriteDigit { index: 2, digit: 3 });
+        game.what_if(WriteDigit { index: 3, digit: 4 });
+        game.what_if(WriteDigit { index: 4, digit: 5 });
+        game.what_if(WriteDigit { index: 5, digit: 6 });
+        game.what_if(WriteDigit { index: 6, digit: 7 });
+        game.what_if(WriteDigit { index: 7, digit: 8 });
+        game.what_if(WriteDigit { index: 8, digit: 9 });
 
         game.print_to(&mut out).unwrap();
 
@@ -199,10 +199,10 @@ mod tests {
     #[test]
     fn prevent_same_digit_twice_in_same_row() {
         let mut game = Sudoku::new();
-        game.play_move(WriteDigit { index: 0, digit: 2 });
-        game.play_move(WriteDigit { index: 8, digit: 5 });
+        game.what_if(WriteDigit { index: 0, digit: 2 });
+        game.what_if(WriteDigit { index: 8, digit: 5 });
         // Won't play a role, because neither same group, row or column
-        game.play_move(WriteDigit {
+        game.what_if(WriteDigit {
             index: 7 * 9 + 6,
             digit: 5,
         });
@@ -215,8 +215,8 @@ mod tests {
     #[test]
     fn prevent_same_digit_twice_in_same_col() {
         let mut game = Sudoku::new();
-        game.play_move(WriteDigit { index: 3, digit: 2 });
-        game.play_move(WriteDigit {
+        game.what_if(WriteDigit { index: 3, digit: 2 });
+        game.what_if(WriteDigit {
             index: 3 + 9 * 5,
             digit: 5,
         });
@@ -229,21 +229,21 @@ mod tests {
     #[test]
     fn short_ciruct_if_one_field_has_no_more_possibile_digits() {
         let mut game = Sudoku::new();
-        game.play_move(WriteDigit { index: 0, digit: 1 });
-        game.play_move(WriteDigit { index: 1, digit: 2 });
-        game.play_move(WriteDigit { index: 2, digit: 3 });
-        game.play_move(WriteDigit { index: 3, digit: 4 });
-        game.play_move(WriteDigit { index: 4, digit: 5 });
-        game.play_move(WriteDigit { index: 5, digit: 6 });
-        game.play_move(WriteDigit { index: 6, digit: 7 });
-        game.play_move(WriteDigit { index: 7, digit: 8 });
-        game.play_move(WriteDigit {
+        game.what_if(WriteDigit { index: 0, digit: 1 });
+        game.what_if(WriteDigit { index: 1, digit: 2 });
+        game.what_if(WriteDigit { index: 2, digit: 3 });
+        game.what_if(WriteDigit { index: 3, digit: 4 });
+        game.what_if(WriteDigit { index: 4, digit: 5 });
+        game.what_if(WriteDigit { index: 5, digit: 6 });
+        game.what_if(WriteDigit { index: 6, digit: 7 });
+        game.what_if(WriteDigit { index: 7, digit: 8 });
+        game.what_if(WriteDigit {
             index: 9 + 8,
             digit: 9,
         });
 
         let mut possible_moves = Vec::new();
-        game.fill_possible_moves(&mut possible_moves);
+        game.extend_possibilities(&mut possible_moves, &[]);
 
         assert_eq!(0, game.possible_digits_at(8).count());
         assert!(possible_moves.is_empty());
