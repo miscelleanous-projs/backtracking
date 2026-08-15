@@ -1,7 +1,7 @@
 //! Find solutions with backtracking.
 
 /// A problem to be tackled with backtracking. Used by the [`Solutions`] iterator which can find
-/// solutions for ypes implementing [`Problem`].
+/// solutions for types implementing [`Problem`].
 ///
 /// Technically any problem solvable with backtracking would not need to keep any state, apart from
 /// the initial state, since all the essential input is part of the history. An empty implementation
@@ -26,15 +26,15 @@ pub trait Problem {
     );
 
     /// Undo the last decision made. If invoked by the [`Solutions`] iterator `last` is to be
-    /// guaranteed, to be the last decision made with [`do`]
+    /// guaranteed, to be the last decision made with [`what_if`](Problem::what_if)
     fn undo(&mut self, last: &Self::Posibility, history: &[Self::Posibility]);
 
     /// Update internal caches to reflect a scenario in which we would decide to execute the given
     /// possibility.
     fn what_if(&mut self, decision: Self::Posibility);
 
-    /// Check if the candidate state we are looking at is a solution to our probelm. If so extract
-    /// the information we are interessted in.
+    /// Check if the candidate state we are looking at is a solution to our problem. If so extract
+    /// the information we are interested in.
     fn is_solution(&self, history: &[Self::Posibility]) -> Option<Self::Solution>;
 }
 
@@ -110,7 +110,7 @@ impl<G: Problem> Iterator for Solutions<G> {
 
 struct Candidate<P> {
     /// Counts the number of turns made to get to this candidate. We keep track of this so we can
-    /// call undo the appropriate number of types, if we roll back to an earlier state.
+    /// call undo the appropriate number of times, if we roll back to an earlier state.
     count: i32,
     /// Possibility which will lead to this candidate
     possibility: P,
