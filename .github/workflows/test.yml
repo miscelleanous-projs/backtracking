@@ -17,3 +17,5 @@ jobs:
       run: cargo run --example knights_journey --release
     - name: Run sudoku
       run: cargo run --example sudoku --release
+    - name: Run word_chain
+      run: cargo run --example word_chain --release --features parallel

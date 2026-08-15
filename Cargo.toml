@@ -33,3 +33,7 @@ rayon = { version = "1", optional = true }
 [features]
 # Experimental: opts into parallel_solutions(). API shape may still change in a minor version.
 parallel = ["dep:rayon"]
+
+[[example]]
+name = "word_chain"
+required-features = ["parallel"]

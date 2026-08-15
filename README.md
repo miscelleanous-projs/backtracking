@@ -10,7 +10,7 @@ neat enough to put it into its own repository.
 
 ## Fork additions
 
-This fork adds test coverage (the library and all three examples now have unit tests; CI runs
+This fork adds test coverage (the library and all five examples now have unit tests; CI runs
 `cargo test --all-targets` against both the default and `parallel` feature sets) and two
 backward-compatible extensions to the `Problem`/`Solutions` API:
 
@@ -23,5 +23,6 @@ backward-compatible extensions to the `Problem`/`Solutions` API:
   branch still walked sequentially by an ordinary `Solutions` iterator on its own thread. The extra
   `Clone + Send + Sync` bounds only apply at that new call site — `Solutions::new` and its bounds
   are untouched, and the `rayon` dependency is not compiled unless the feature is enabled. Newer
-  and less exercised than the core API (no bundled example uses it yet); its shape may still
-  change in a minor version.
+  and less exercised than the core API; the `word_chain` example (`cargo run --example word_chain
+  --release --features parallel`) uses it to time a word-chain search sequentially and in parallel
+  side by side. Its shape may still change in a minor version.
