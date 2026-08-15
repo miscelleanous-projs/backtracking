@@ -48,3 +48,39 @@ fn reachable_fields(position: Position) -> Vec<Position> {
         .map(|(row, column)| Position::new(row, column))
         .collect()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn corner_has_two_reachable_fields() {
+        let board = Board::new();
+        let mut moves = Vec::new();
+
+        board.reachable_fields(Position::new(0, 0), &mut moves);
+
+        assert_eq!(2, moves.len());
+    }
+
+    #[test]
+    fn center_has_eight_reachable_fields() {
+        let board = Board::new();
+        let mut moves = Vec::new();
+
+        board.reachable_fields(Position::new(3, 3), &mut moves);
+
+        assert_eq!(8, moves.len());
+    }
+
+    #[test]
+    fn reachable_fields_clears_prior_contents() {
+        let board = Board::new();
+        let mut moves = vec![Position::new(7, 7)];
+
+        board.reachable_fields(Position::new(0, 0), &mut moves);
+
+        assert_eq!(2, moves.len());
+        assert!(!moves.contains(&Position::new(7, 7)));
+    }
+}

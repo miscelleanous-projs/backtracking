@@ -92,3 +92,85 @@ impl Display for NQueensSolution {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn same_row_conflicts() {
+        let a = QueenAt { row: 2, column: 3 };
+        let b = QueenAt { row: 2, column: 5 };
+        assert!(a.conflicts(b));
+    }
+
+    #[test]
+    fn same_column_conflicts() {
+        let a = QueenAt { row: 1, column: 4 };
+        let b = QueenAt { row: 3, column: 4 };
+        assert!(a.conflicts(b));
+    }
+
+    #[test]
+    fn same_diagonal_conflicts() {
+        let a = QueenAt { row: 1, column: 1 };
+        let b = QueenAt { row: 3, column: 3 };
+        assert!(a.conflicts(b));
+
+        let c = QueenAt { row: 0, column: 4 };
+        let d = QueenAt { row: 2, column: 2 };
+        assert!(c.conflicts(d));
+    }
+
+    #[test]
+    fn non_conflicting_positions_do_not_conflict() {
+        let a = QueenAt { row: 0, column: 0 };
+        let b = QueenAt { row: 1, column: 2 };
+        assert!(!a.conflicts(b));
+    }
+
+    #[test]
+    fn extend_possibilities_excludes_conflicting_columns() {
+        let queens = NQueens::new(4);
+        let history = [QueenAt { row: 0, column: 0 }];
+
+        let mut possibilities = Vec::new();
+        queens.extend_possibilities(&mut possibilities, &history);
+
+        // Row 1 candidates must avoid column 0 (same column) and column 1 (diagonal).
+        let columns: Vec<u32> = possibilities.iter().map(|q| q.column).collect();
+        assert_eq!(vec![2, 3], columns);
+        assert!(possibilities.iter().all(|q| q.row == 1));
+    }
+
+    #[test]
+    fn extend_possibilities_empty_once_every_row_is_placed() {
+        let queens = NQueens::new(4);
+        let history = vec![QueenAt { row: 0, column: 0 }; 4];
+
+        let mut possibilities = Vec::new();
+        queens.extend_possibilities(&mut possibilities, &history);
+
+        assert!(possibilities.is_empty());
+    }
+
+    #[test]
+    fn is_solution_maps_row_to_column() {
+        let queens = NQueens::new(4);
+        let history = [
+            QueenAt { row: 0, column: 1 },
+            QueenAt { row: 1, column: 3 },
+            QueenAt { row: 2, column: 0 },
+            QueenAt { row: 3, column: 2 },
+        ];
+
+        let solution = queens.is_solution(&history).unwrap();
+        assert_eq!(vec![1, 3, 0, 2], solution.0);
+    }
+
+    #[test]
+    fn four_queens_has_exactly_two_solutions() {
+        let solutions: Vec<_> = Solutions::new(NQueens::new(4)).collect();
+        assert_eq!(2, solutions.len());
+    }
+}
