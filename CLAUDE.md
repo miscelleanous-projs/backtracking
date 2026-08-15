@@ -15,6 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - (`knights_journey`, `sudoku`, and `word_chain` are slow enough that CI runs them in `--release` mode.)
 - Run a single test: `cargo test <test_name>`
 - Lint: `cargo clippy --all-targets --features parallel`
+  - CI runs clippy for both feature sets with `-D warnings`, so any new lint fails the build. It also runs `cargo fmt --check`; run `cargo fmt` before pushing.
 - Docs: `cargo doc --no-deps --features parallel` (should build with no `rustdoc` warnings)
 
 CI (`.github/workflows/test.yml`) runs `cargo test --all-targets` against both the default and `parallel` feature sets, plus the `knights_journey` and `sudoku` examples in release mode — treat those two as executable regression tests, not just demos. Unit tests live alongside the code they test (`#[cfg(test)] mod tests` in `src/lib.rs` and in each example file), not in a separate `tests/` directory.

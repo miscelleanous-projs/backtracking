@@ -156,9 +156,9 @@ where
     let mut roots = Vec::new();
     init.extend_possibilities(&mut roots, &[]);
 
-    roots.into_par_iter().flat_map_iter(move |first_move| {
-        Solutions::seeded(init.clone(), first_move)
-    })
+    roots
+        .into_par_iter()
+        .flat_map_iter(move |first_move| Solutions::seeded(init.clone(), first_move))
 }
 
 impl<G: Problem> Iterator for Solutions<G> {
@@ -373,7 +373,11 @@ mod tests {
 
     #[test]
     fn cached_state_stays_in_sync_with_history_across_backtracks() {
-        let solutions: Vec<_> = Solutions::new(SumChecking { n: 4, cached_sum: 0 }).collect();
+        let solutions: Vec<_> = Solutions::new(SumChecking {
+            n: 4,
+            cached_sum: 0,
+        })
+        .collect();
 
         assert_eq!(16, solutions.len());
     }
