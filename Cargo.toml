@@ -1,10 +1,10 @@
 [package]
-name = "backtracking"
+name = "generic-backtracking"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/pacman82/backtracking"
-documentation = "https://docs.rs/backtracking/"
+repository = "https://github.com/miscelleanous-projs/backtracking"
+documentation = "https://docs.rs/generic-backtracking/"
 
 # A short blurb about the package. This is not rendered in any format when
 # uploaded to crates.io (aka this is not markdown).
@@ -22,6 +22,11 @@ keywords = ["backtracking"]
 categories = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# Keeps the Rust-facing crate name as `backtracking` (unchanged `use backtracking::...` in every
+# example) while the crates.io package name above is unique.
+[lib]
+name = "backtracking"
 
 [dependencies]
 rayon = { version = "1", optional = true }
