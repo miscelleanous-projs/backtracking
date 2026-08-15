@@ -91,10 +91,22 @@ mod tests {
     fn new_journey_marks_start_as_visited() {
         let journey = fresh_journey();
 
+        assert!(journey.visited[start().as_index()]);
+    }
+
+    /// The knight may not land on a field it has already been to. Asserting this needs a visited
+    /// field that is actually reachable from `current`: the start itself never is, since no knight
+    /// move returns to where it began.
+    #[test]
+    fn visited_fields_are_not_offered_as_moves() {
+        let mut journey = fresh_journey();
+        // Both fields the knight can reach from the A1 corner, one of them already used up.
+        journey.visited[Position::new(2, 1).as_index()] = true;
+
         let mut possible_moves = Vec::new();
         journey.extend_possibilities(&mut possible_moves, &[]);
 
-        assert!(!possible_moves.contains(&start()));
+        assert_eq!(vec![Position::new(1, 2)], possible_moves);
     }
 
     #[test]

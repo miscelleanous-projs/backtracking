@@ -143,9 +143,32 @@ impl Problem for Sudoku {
 
 #[cfg(test)]
 mod tests {
-    use generic_backtracking::Problem;
+    use generic_backtracking::{Problem, Solutions};
 
     use super::{Sudoku, WriteDigit};
+
+    /// Every row, column and 3x3 box of a solved grid holds each digit `1..=9` exactly once. The
+    /// index arithmetic is written out independently of `possible_digits_at`, so a mistake there
+    /// cannot hide itself by being repeated here.
+    fn assert_is_valid_solution(solution: &Sudoku) {
+        let expected: Vec<u8> = (1..=9).collect();
+        let sorted_digits = |indices: Vec<usize>| {
+            let mut digits: Vec<u8> = indices.into_iter().map(|i| solution.fields[i]).collect();
+            digits.sort();
+            digits
+        };
+
+        for n in 0..9 {
+            let row: Vec<usize> = (0..9).map(|i| n * 9 + i).collect();
+            let column: Vec<usize> = (0..9).map(|i| n + i * 9).collect();
+            let box_origin = (n % 3) * 3 + (n / 3) * 27;
+            let box_: Vec<usize> = (0..9).map(|i| box_origin + i % 3 + (i / 3) * 9).collect();
+
+            assert_eq!(expected, sorted_digits(row), "row {n}");
+            assert_eq!(expected, sorted_digits(column), "column {n}");
+            assert_eq!(expected, sorted_digits(box_), "box {n}");
+        }
+    }
 
     /// Writes digits 1..=8 into cells 0..=7 (the first row except its last cell), shared by tests
     /// that need a partially-filled first row before diverging on the final move.
@@ -222,6 +245,53 @@ mod tests {
         let possibilities = game.possible_digits_at(3 + 9 * 2).collect::<Vec<u8>>();
 
         assert_eq!(&[1u8, 3, 4, 6, 7, 8, 9][..], possibilities);
+    }
+
+    /// The 3x3 box rule, tested the same way as the row and column rules above. Both cells below
+    /// share a box with cell `0` while sharing neither its row nor its column, so only the box
+    /// rule can rule their digits out.
+    #[test]
+    fn prevent_same_digit_twice_in_same_group() {
+        let mut game = Sudoku::new();
+        game.what_if(WriteDigit {
+            index: 9 + 1,
+            digit: 2,
+        });
+        game.what_if(WriteDigit {
+            index: 18 + 2,
+            digit: 5,
+        });
+
+        let possibilities = game.possible_digits_at(0).collect::<Vec<u8>>();
+
+        assert_eq!(&[1u8, 3, 4, 6, 7, 8, 9][..], possibilities);
+    }
+
+    /// Solving a puzzle end to end. Nothing else here runs a search, which left `undo`,
+    /// `is_solution` and the cell-selection heuristic in `extend_possibilities` unasserted --
+    /// inverting that heuristic makes the solver yield no solutions at all, and the example's CI
+    /// step cannot catch it either, since it only prints whatever it happens to find.
+    #[test]
+    fn solves_a_puzzle_into_a_valid_grid() {
+        let puzzle = Sudoku::from_bytes([
+            6, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 9, 0, 0, 0, 2, 0, 0, 0, 0, 7, 4, 0, 9, 0, 0, 0, 0, 0,
+            0, 0, 1, 0, 0, 0, 7, 4, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 5, 3, 0, 1, 0, 0,
+            0, 0, 0, 4, 0, 0, 0, 6, 3, 0, 7, 0, 9, 0, 0, 9, 0, 0, 0, 2, 0, 3, 0,
+        ]);
+
+        let solution = Solutions::new(puzzle.clone())
+            .next()
+            .expect("puzzle should be solvable");
+
+        assert_is_valid_solution(&solution);
+        for (index, &given) in puzzle.fields.iter().enumerate() {
+            if given != 0 {
+                assert_eq!(
+                    given, solution.fields[index],
+                    "given at {index} was overwritten"
+                );
+            }
+        }
     }
 
     #[test]

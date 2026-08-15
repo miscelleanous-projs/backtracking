@@ -73,6 +73,33 @@ mod tests {
         assert_eq!(8, moves.len());
     }
 
+    /// The count-based assertions above cannot see a corrupted entry in `MOVES`: swapping one for
+    /// a non-knight offset that still lands on the board leaves both counts intact. Check the
+    /// shape of every cached move instead, over the whole board.
+    #[test]
+    fn every_reachable_field_is_a_knight_move_away() {
+        let board = Board::new();
+        let mut moves = Vec::new();
+        let mut total = 0;
+
+        for index in 0..NUM_FIELDS {
+            let from = Position::from_index(index);
+            board.reachable_fields(from, &mut moves);
+            total += moves.len();
+            for to in &moves {
+                let rows = (from.row() - to.row()).abs();
+                let columns = (from.column() - to.column()).abs();
+                assert!(
+                    (rows == 1 && columns == 2) || (rows == 2 && columns == 1),
+                    "{from} -> {to} is not a knight move"
+                );
+            }
+        }
+
+        // A knight on an 8x8 board has 336 moves available in total.
+        assert_eq!(336, total);
+    }
+
     #[test]
     fn reachable_fields_clears_prior_contents() {
         let board = Board::new();
