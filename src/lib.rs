@@ -12,7 +12,7 @@ pub trait Problem {
     /// Describes a decision made in a problem state leading to a new candidate for a solution. E.g.
     /// which field to jump to in a knights journey problem or which digit to write into a cell for
     /// a sudoku puzzle.
-    type Possibility: Copy;
+    type Possibility: Clone;
     /// Final state we are interested in. E.g. The history of moves made for a knights journey, or
     /// the final distribution of digits in the cells of a sudoku puzzle.
     type Solution;
@@ -56,7 +56,7 @@ impl<G: Problem> Solutions<G> {
             .iter()
             .map(|pos| Candidate {
                 count: 1,
-                possibility: *pos,
+                possibility: pos.clone(),
             })
             .collect();
         Self {
@@ -66,6 +66,45 @@ impl<G: Problem> Solutions<G> {
             current: init,
         }
     }
+
+    /// Restricts the initial search frontier to a single possibility, leaving the rest of the
+    /// tree walk identical to [`Solutions::new`]. Used to partition the root of the search tree
+    /// into independent branches, e.g. for [`parallel_solutions`].
+    fn seeded(current: G, first: G::Possibility) -> Self {
+        Self {
+            decisions: Vec::new(),
+            open: vec![Candidate {
+                count: 1,
+                possibility: first,
+            }],
+            history: Vec::new(),
+            current,
+        }
+    }
+}
+
+/// Explores the independent branches rooted at each of the initial possibilities of `init` in
+/// parallel, each branch searched sequentially by an ordinary [`Solutions`] iterator on its own
+/// thread. Requires the `parallel` feature.
+///
+/// This only requires [`Clone`] on `P` (to fork one problem instance per root branch) and
+/// [`Send`] bounds (to move those instances across threads); it does not change [`Problem`] or
+/// [`Solutions`] in any way, so it is purely additive to the crate's API.
+#[cfg(feature = "parallel")]
+pub fn parallel_solutions<P>(init: P) -> impl rayon::iter::ParallelIterator<Item = P::Solution>
+where
+    P: Problem + Clone + Send + Sync,
+    P::Solution: Send,
+    P::Possibility: Send,
+{
+    use rayon::iter::{IntoParallelIterator, ParallelIterator};
+
+    let mut roots = Vec::new();
+    init.extend_possibilities(&mut roots, &[]);
+
+    roots.into_par_iter().flat_map_iter(move |first_move| {
+        Solutions::seeded(init.clone(), first_move)
+    })
 }
 
 impl<G: Problem> Iterator for Solutions<G> {
@@ -86,7 +125,7 @@ impl<G: Problem> Iterator for Solutions<G> {
             }
 
             // We advance one move deeper into the search tree
-            self.current.what_if(mov);
+            self.current.what_if(mov.clone());
             self.history.push(mov);
 
             // Emit solution
@@ -99,9 +138,9 @@ impl<G: Problem> Iterator for Solutions<G> {
             self.current
                 .extend_possibilities(&mut self.decisions, &self.history);
             self.open
-                .extend(self.decisions.iter().map(|&position| Candidate {
+                .extend(self.decisions.iter().map(|position| Candidate {
                     count: count + 1,
-                    possibility: position,
+                    possibility: position.clone(),
                 }))
         }
         None
@@ -180,6 +219,7 @@ mod tests {
 
     /// Only yields permutations of `0..n`, by refusing to reuse a value already present in
     /// `history`. Checks that backtracking correctly prunes branches based on sibling state.
+    #[derive(Clone)]
     struct DistinctPermutations {
         n: u8,
     }
@@ -215,6 +255,20 @@ mod tests {
             sorted.sort();
             assert_eq!(vec![0, 1, 2], sorted);
         }
+    }
+
+    #[cfg(feature = "parallel")]
+    #[test]
+    fn parallel_search_yields_the_same_solutions_as_sequential_search() {
+        use rayon::iter::ParallelIterator;
+
+        let mut sequential: Vec<_> = Solutions::new(DistinctPermutations { n: 4 }).collect();
+        let mut parallel: Vec<_> = parallel_solutions(DistinctPermutations { n: 4 }).collect();
+
+        sequential.sort();
+        parallel.sort();
+        assert_eq!(sequential, parallel);
+        assert_eq!(24, parallel.len()); // 4! permutations
     }
 
     /// Tracks a running sum as cached state via `what_if`/`undo`, and cross checks it against a
