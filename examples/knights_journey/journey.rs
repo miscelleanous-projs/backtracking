@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use backtracking::Problem;
+use generic_backtracking::Problem;
 
 use super::{
     board::{Board, NUM_FIELDS},

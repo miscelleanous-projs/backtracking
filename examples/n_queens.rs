@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use backtracking::{Problem, Solutions};
+use generic_backtracking::{Problem, Solutions};
 
 fn main() {
     let board = NQueens::new(8);

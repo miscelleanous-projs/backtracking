@@ -1,7 +1,7 @@
 //! The knights journey is a puzzle. A knight starts in the upper left corner (A1) of a chessboard
 //! and visits each field exactly once.
 
-use backtracking::Solutions;
+use generic_backtracking::Solutions;
 use journey::Journey;
 use position::Position;
 

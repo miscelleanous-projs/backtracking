@@ -1,6 +1,6 @@
 use std::io::{self, stdout, Write};
 
-use backtracking::{Problem, Solutions};
+use generic_backtracking::{Problem, Solutions};
 
 fn main() -> io::Result<()> {
     // An empty sudoku field
@@ -143,7 +143,7 @@ impl Problem for Sudoku {
 
 #[cfg(test)]
 mod tests {
-    use backtracking::Problem;
+    use generic_backtracking::Problem;
 
     use super::{Sudoku, WriteDigit};
 
