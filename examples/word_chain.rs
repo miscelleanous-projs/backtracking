@@ -116,7 +116,7 @@ mod tests {
     }
 
     #[test]
-    fn extend_possibilities_filters_by_last_letter_and_reuse() {
+    fn extend_possibilities_filters_by_last_letter() {
         let problem = WordChain {
             dictionary: dictionary(),
             target_len: 3,
@@ -126,8 +126,30 @@ mod tests {
         let mut possibilities = Vec::new();
         problem.extend_possibilities(&mut possibilities, &history);
 
-        // Only "tag" starts with "cat"'s last letter and hasn't been used yet.
+        // "tag" is the only word starting with "cat"'s last letter.
         assert_eq!(vec!["tag".to_string()], possibilities);
+    }
+
+    /// Words may not repeat within a chain. `gnu -> used -> dog` leaves "gnu" as the only word
+    /// starting with "dog"'s last letter, and it is already spent, so the chain is a dead end.
+    /// Needs a history that actually revisits, which is why the shorter cases above cannot cover
+    /// this: `dictionary`'s successor graph is `cat -> tag -> gnu` plus the 3-cycle
+    /// `gnu -> used -> dog -> gnu`, so no chain shorter than four words can repeat one.
+    #[test]
+    fn extend_possibilities_excludes_words_already_in_the_chain() {
+        let problem = WordChain {
+            dictionary: dictionary(),
+            target_len: 4,
+        };
+        let history = ["gnu", "used", "dog"].map(String::from).to_vec();
+
+        let mut possibilities = Vec::new();
+        problem.extend_possibilities(&mut possibilities, &history);
+
+        assert!(
+            possibilities.is_empty(),
+            "expected a dead end, got {possibilities:?}"
+        );
     }
 
     #[test]
@@ -193,6 +215,28 @@ mod tests {
             vec!["gnu", "used", "dog"],
             vec!["used", "dog", "gnu"],
             vec!["dog", "gnu", "used"],
+        ];
+        expected.sort();
+        assert_eq!(expected, solutions);
+    }
+
+    /// The length-3 case above cannot see the distinctness rule at all (see
+    /// `extend_possibilities_excludes_words_already_in_the_chain`); at length 4 it starts pruning,
+    /// cutting what would otherwise be five chains down to two. Without it the three chains that
+    /// walk the `gnu -> used -> dog` cycle back onto their own first word would also be reported.
+    #[test]
+    fn chains_may_not_reuse_a_word() {
+        let problem = WordChain {
+            dictionary: dictionary(),
+            target_len: 4,
+        };
+
+        let mut solutions: Vec<_> = Solutions::new(problem).collect();
+        solutions.sort();
+
+        let mut expected = vec![
+            vec!["cat", "tag", "gnu", "used"],
+            vec!["tag", "gnu", "used", "dog"],
         ];
         expected.sort();
         assert_eq!(expected, solutions);
