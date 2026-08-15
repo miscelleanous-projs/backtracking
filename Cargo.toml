@@ -3,7 +3,7 @@ name = "generic-backtracking"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/miscelleanous-projs/backtracking"
+repository = "https://github.com/miscelleanous-projs/generic-backtracking"
 documentation = "https://docs.rs/generic-backtracking/"
 
 # A short blurb about the package. This is not rendered in any format when
