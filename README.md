@@ -1,4 +1,4 @@
-# Backtracking
+# Generic Backtracking
 
 [![Test](https://github.com/miscelleanous-projs/generic-backtracking/actions/workflows/test.yml/badge.svg)](https://github.com/miscelleanous-projs/generic-backtracking/actions/workflows/test.yml)
 

@@ -1,4 +1,42 @@
-//! Find solutions with backtracking.
+//! Find solutions to combinatorial search problems using backtracking.
+//!
+//! Implement [`Problem`] to describe how a problem's decisions are made, then drive it with the
+//! [`Solutions`] iterator. This example enumerates every subset of `[1, 2, 3]` that sums to `3`:
+//!
+//! ```
+//! use generic_backtracking::{Problem, Solutions};
+//!
+//! struct SubsetSum {
+//!     items: Vec<i32>,
+//!     target: i32,
+//! }
+//!
+//! impl Problem for SubsetSum {
+//!     /// Index of an item we decide to include next.
+//!     type Possibility = usize;
+//!     /// The subset of items which sums to `target`.
+//!     type Solution = Vec<i32>;
+//!
+//!     fn extend_possibilities(&self, possibilities: &mut Vec<usize>, history: &[usize]) {
+//!         // Only consider items after the last one picked, so each subset is generated once.
+//!         let next = history.last().map_or(0, |&i| i + 1);
+//!         possibilities.extend(next..self.items.len());
+//!     }
+//!
+//!     fn what_if(&mut self, _decision: usize) {}
+//!     fn undo(&mut self, _last: &usize, _history: &[usize]) {}
+//!
+//!     fn is_solution(&self, history: &[usize]) -> Option<Vec<i32>> {
+//!         let subset: Vec<i32> = history.iter().map(|&i| self.items[i]).collect();
+//!         (subset.iter().sum::<i32>() == self.target).then_some(subset)
+//!     }
+//! }
+//!
+//! let problem = SubsetSum { items: vec![1, 2, 3], target: 3 };
+//! let mut solutions: Vec<Vec<i32>> = Solutions::new(problem).collect();
+//! solutions.sort();
+//! assert_eq!(solutions, vec![vec![1, 2], vec![3]]);
+//! ```
 
 /// A problem to be tackled with backtracking. Used by the [`Solutions`] iterator which can find
 /// solutions for types implementing [`Problem`].

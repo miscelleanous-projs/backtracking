@@ -14,14 +14,18 @@ description = "Iterate over Solutions using backtracking"
 # This is a list of up to five keywords that describe this crate. Keywords
 # are searchable on crates.io, and you may choose any words that would
 # help someone find this crate.
-keywords = ["backtracking"]
+keywords = ["backtracking", "search", "puzzle", "constraint", "algorithm"]
 
 # This is a list of up to five categories where this crate would fit.
 # Categories are a fixed list available at crates.io/category_slugs, and
 # they must match exactly.
-categories = []
+categories = ["algorithms", "data-structures"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# Keeps agent instructions and CI workflow definitions out of the published crate; neither is
+# useful to a crates.io consumer.
+exclude = ["CLAUDE.md", ".github/**"]
 
 [dependencies]
 rayon = { version = "1", optional = true }
