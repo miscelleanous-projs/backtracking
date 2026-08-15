@@ -158,6 +158,14 @@ mod tests {
         }
     }
 
+    /// Builds the expected `print_to` output for a board whose first row is `first_row` and
+    /// every other row is still empty (`XXXXXXXXX`).
+    fn expected_board(first_row: &str) -> String {
+        let mut expected = format!("{first_row}\n");
+        expected.push_str(&"XXXXXXXXX\n".repeat(8));
+        expected
+    }
+
     #[test]
     fn print_empty_sudoku() {
         let mut out = Vec::new();
@@ -165,17 +173,10 @@ mod tests {
 
         game.print_to(&mut out).unwrap();
 
-        let expect = "XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-        ";
-        assert_eq!(expect, std::str::from_utf8(&out).unwrap());
+        assert_eq!(
+            expected_board("XXXXXXXXX"),
+            std::str::from_utf8(&out).unwrap()
+        );
     }
 
     #[test]
@@ -187,17 +188,10 @@ mod tests {
 
         game.print_to(&mut out).unwrap();
 
-        let expect = "123456789\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-            XXXXXXXXX\n\
-        ";
-        assert_eq!(expect, std::str::from_utf8(&out).unwrap());
+        assert_eq!(
+            expected_board("123456789"),
+            std::str::from_utf8(&out).unwrap()
+        );
     }
 
     #[test]

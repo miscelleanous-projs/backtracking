@@ -77,21 +77,29 @@ pub struct Solution([Position; NUM_FIELDS]);
 mod tests {
     use super::*;
 
+    /// Every test starts the knight at the same corner; kept as a single source of truth rather
+    /// than repeating `Position::new(0, 0)` in each test.
+    fn start() -> Position {
+        Position::new(0, 0)
+    }
+
+    fn fresh_journey() -> Journey {
+        Journey::new(start())
+    }
+
     #[test]
     fn new_journey_marks_start_as_visited() {
-        let start = Position::new(0, 0);
-        let journey = Journey::new(start);
+        let journey = fresh_journey();
 
         let mut possible_moves = Vec::new();
         journey.extend_possibilities(&mut possible_moves, &[]);
 
-        assert!(!possible_moves.contains(&start));
+        assert!(!possible_moves.contains(&start()));
     }
 
     #[test]
     fn what_if_updates_current_and_marks_visited() {
-        let start = Position::new(0, 0);
-        let mut journey = Journey::new(start);
+        let mut journey = fresh_journey();
         let next = Position::new(2, 1);
 
         journey.what_if(next);
@@ -102,8 +110,7 @@ mod tests {
 
     #[test]
     fn undo_restores_current_to_previous_history_entry_and_clears_visited() {
-        let start = Position::new(0, 0);
-        let mut journey = Journey::new(start);
+        let mut journey = fresh_journey();
         let first = Position::new(2, 1);
         let second = Position::new(4, 2);
 
@@ -117,24 +124,22 @@ mod tests {
 
     #[test]
     fn undo_falls_back_to_start_when_history_is_empty() {
-        let start = Position::new(0, 0);
-        let mut journey = Journey::new(start);
+        let mut journey = fresh_journey();
         let first = Position::new(2, 1);
 
         journey.what_if(first);
         journey.undo(&first, &[]);
 
-        assert_eq!(start, journey.current);
+        assert_eq!(start(), journey.current);
     }
 
     #[test]
     fn is_solution_only_once_every_remaining_field_has_a_move() {
-        let start = Position::new(0, 0);
-        let journey = Journey::new(start);
+        let journey = fresh_journey();
 
         assert!(journey.is_solution(&[]).is_none());
 
-        let history = vec![Position::new(0, 0); NUM_FIELDS - 1];
+        let history = vec![start(); NUM_FIELDS - 1];
         assert!(journey.is_solution(&history).is_some());
     }
 }
