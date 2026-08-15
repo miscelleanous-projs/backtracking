@@ -112,6 +112,29 @@ mod tests {
         assert!(adjacency.iter().all(|neighbors| neighbors.len() == 3));
     }
 
+    /// Pins `petersen_graph` to the actual Petersen graph rather than merely "some 3-regular graph
+    /// on 10 vertices". Petersen is the unique strongly regular graph srg(10, 3, 0, 1): adjacent
+    /// vertices share no common neighbour, non-adjacent vertices share exactly one. Worth checking
+    /// explicitly, because wiring the inner ring as `(i + 1) % 5` instead of `(i + 2) % 5` is an
+    /// easy typo that builds the pentagonal prism — also 10 vertices and 3-regular, but Hamiltonian,
+    /// so it would invalidate what this example claims to demonstrate.
+    #[test]
+    fn petersen_graph_is_the_unique_strongly_regular_graph_srg_10_3_0_1() {
+        let adjacency = petersen_graph();
+
+        assert_eq!(10, adjacency.len());
+        assert!(adjacency.iter().all(|neighbors| neighbors.len() == 3));
+        for u in 0..adjacency.len() {
+            for v in (u + 1)..adjacency.len() {
+                let common = (0..adjacency.len())
+                    .filter(|w| adjacency[u].contains(w) && adjacency[v].contains(w))
+                    .count();
+                let expected = usize::from(!adjacency[u].contains(&v));
+                assert_eq!(expected, common, "common neighbours of {u} and {v}");
+            }
+        }
+    }
+
     #[test]
     fn petersen_graph_adjacency_is_symmetric() {
         let adjacency = petersen_graph();
@@ -150,6 +173,23 @@ mod tests {
         assert_eq!(vec![2, 6], possibilities);
     }
 
+    /// `Solutions` relies on `what_if`/`undo` being exact inverses when it rewinds between sibling
+    /// branches, so check that directly rather than only through a full search.
+    #[test]
+    fn undo_reverses_what_if() {
+        let mut problem = HamiltonianPath::new(petersen_graph(), 0);
+        let unvisited = problem.visited.clone();
+
+        problem.what_if(0);
+        problem.what_if(5);
+        assert!(problem.visited[0] && problem.visited[5]);
+
+        problem.undo(&5, &[0]);
+        problem.undo(&0, &[]);
+
+        assert_eq!(unvisited, problem.visited);
+    }
+
     #[test]
     fn extend_possibilities_empty_once_every_vertex_is_visited() {
         let problem = HamiltonianPath::new(petersen_graph(), 0);
@@ -177,7 +217,19 @@ mod tests {
 
         let paths: Vec<_> = Solutions::new(problem).collect();
 
-        assert!(!paths.is_empty());
+        // The Petersen graph has 120 Hamiltonian paths; each is found from both of its endpoints,
+        // and by vertex transitivity those 240 endpoints spread evenly over the 10 vertices.
+        assert_eq!(24, paths.len());
+        // Every path is a genuine permutation of the vertices walking real edges.
+        for path in &paths {
+            let mut visited = path.clone();
+            visited.sort();
+            assert_eq!((0..10).collect::<Vec<usize>>(), visited);
+            assert!(path.windows(2).all(|w| adjacency[w[0]].contains(&w[1])));
+        }
+        // Non-Hamiltonicity: no path's far end links back to the start. Since the graph is vertex
+        // transitive, any Hamiltonian cycle would have to pass through vertex 0, so this rules out
+        // a Hamiltonian cycle anywhere in the graph, not just one through 0.
         assert!(paths
             .iter()
             .all(|path| !adjacency[*path.last().unwrap()].contains(&0)));
