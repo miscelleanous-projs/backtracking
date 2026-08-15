@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Test (default): `cargo test --all-targets`
 - Test (with the opt-in parallel search feature): `cargo test --all-targets --features parallel`
   - Both are run in CI; changes to `src/lib.rs` should pass both.
+- Doc tests: `cargo test --doc --features parallel`
+  - `--all-targets` excludes doctests, so the crate-level example in `src/lib.rs` needs this separate command (CI runs it as its own step). Run it after touching that example or the API it uses.
   - `word_chain` requires the `parallel` feature (`required-features` in `Cargo.toml`), so it's only built/tested by the second command, not the first.
 - Run an example: `cargo run --example n_queens`, `cargo run --example sudoku --release`, `cargo run --example knights_journey --release`, `cargo run --example word_chain --release --features parallel`, `cargo run --example hamiltonian_path`
   - (`knights_journey`, `sudoku`, and `word_chain` are slow enough that CI runs them in `--release` mode.)
