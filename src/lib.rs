@@ -12,7 +12,7 @@ pub trait Problem {
     /// Describes a decision made in a problem state leading to a new candidate for a solution. E.g.
     /// which field to jump to in a knights journey problem or which digit to write into a cell for
     /// a sudoku puzzle.
-    type Posibility: Copy;
+    type Possibility: Copy;
     /// Final state we are interested in. E.g. The history of moves made for a knights journey, or
     /// the final distribution of digits in the cells of a sudoku puzzle.
     type Solution;
@@ -21,30 +21,30 @@ pub trait Problem {
     /// assume that the `possibilities` is empty if invoked through the `Solutions` iterator.
     fn extend_possibilities(
         &self,
-        possibilities: &mut Vec<Self::Posibility>,
-        history: &[Self::Posibility],
+        possibilities: &mut Vec<Self::Possibility>,
+        history: &[Self::Possibility],
     );
 
     /// Undo the last decision made. If invoked by the [`Solutions`] iterator `last` is to be
     /// guaranteed, to be the last decision made with [`what_if`](Problem::what_if)
-    fn undo(&mut self, last: &Self::Posibility, history: &[Self::Posibility]);
+    fn undo(&mut self, last: &Self::Possibility, history: &[Self::Possibility]);
 
     /// Update internal caches to reflect a scenario in which we would decide to execute the given
     /// possibility.
-    fn what_if(&mut self, decision: Self::Posibility);
+    fn what_if(&mut self, decision: Self::Possibility);
 
     /// Check if the candidate state we are looking at is a solution to our problem. If so extract
     /// the information we are interested in.
-    fn is_solution(&self, history: &[Self::Posibility]) -> Option<Self::Solution>;
+    fn is_solution(&self, history: &[Self::Possibility]) -> Option<Self::Solution>;
 }
 
 /// An iterator performing backtracking to find solutions to a problem.
 pub struct Solutions<P: Problem> {
-    decisions: Vec<P::Posibility>,
-    open: Vec<Candidate<P::Posibility>>,
+    decisions: Vec<P::Possibility>,
+    open: Vec<Candidate<P::Possibility>>,
     /// Keeps track of the decisions, which yielded the current problem state, starting from the
     /// initial state.
-    history: Vec<P::Posibility>,
+    history: Vec<P::Possibility>,
     current: P,
 }
 
@@ -127,7 +127,7 @@ mod tests {
     }
 
     impl Problem for BinarySequences {
-        type Posibility = bool;
+        type Possibility = bool;
         type Solution = Vec<bool>;
 
         fn extend_possibilities(&self, possibilities: &mut Vec<bool>, history: &[bool]) {
@@ -162,7 +162,7 @@ mod tests {
         struct Empty;
 
         impl Problem for Empty {
-            type Posibility = ();
+            type Possibility = ();
             type Solution = ();
 
             fn extend_possibilities(&self, _possibilities: &mut Vec<()>, _history: &[()]) {}
@@ -185,7 +185,7 @@ mod tests {
     }
 
     impl Problem for DistinctPermutations {
-        type Posibility = u8;
+        type Possibility = u8;
         type Solution = Vec<u8>;
 
         fn extend_possibilities(&self, possibilities: &mut Vec<u8>, history: &[u8]) {
@@ -227,7 +227,7 @@ mod tests {
     }
 
     impl Problem for SumChecking {
-        type Posibility = bool;
+        type Possibility = bool;
         type Solution = i32;
 
         fn extend_possibilities(&self, possibilities: &mut Vec<bool>, history: &[bool]) {

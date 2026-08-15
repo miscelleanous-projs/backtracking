@@ -37,7 +37,7 @@ impl QueenAt {
 }
 
 impl Problem for NQueens {
-    type Posibility = QueenAt;
+    type Possibility = QueenAt;
     type Solution = NQueensSolution;
 
     fn extend_possibilities(&self, possible_moves: &mut Vec<QueenAt>, history: &[QueenAt]) {
@@ -54,7 +54,7 @@ impl Problem for NQueens {
         possible_moves.extend(possibilities);
     }
 
-    fn undo(&mut self, _last: &Self::Posibility, _history: &[Self::Posibility]) {}
+    fn undo(&mut self, _last: &Self::Possibility, _history: &[Self::Possibility]) {}
 
     fn what_if(&mut self, _next: QueenAt) {}
 

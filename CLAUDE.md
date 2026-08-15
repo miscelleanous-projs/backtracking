@@ -22,7 +22,7 @@ The entire library is `src/lib.rs` and consists of one trait and one iterator:
   - `undo` — reverses a `what_if`, restoring state when backtracking past that decision.
   - `is_solution` — checks whether the current `history` represents a complete solution, returning `Some(Self::Solution)` if so.
 
-- **`Solutions<P: Problem>`** — a lazy `Iterator<Item = P::Solution>` implementing depth-first backtracking search over an implicit tree of `Problem::Posibility` decisions. It maintains:
+- **`Solutions<P: Problem>`** — a lazy `Iterator<Item = P::Solution>` implementing depth-first backtracking search over an implicit tree of `Problem::Possibility` decisions. It maintains:
   - `open`: a stack of `Candidate { count, possibility }` — unexplored decisions paired with their depth in the tree.
   - `history`: the sequence of decisions leading to the current state.
   - `current`: the live `Problem` instance whose internal cache reflects `history`.

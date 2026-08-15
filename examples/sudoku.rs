@@ -81,7 +81,7 @@ pub struct WriteDigit {
 }
 
 impl Problem for Sudoku {
-    type Posibility = WriteDigit;
+    type Possibility = WriteDigit;
     type Solution = Sudoku;
 
     // We look over all posibilities for the first free index

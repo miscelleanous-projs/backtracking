@@ -42,7 +42,7 @@ impl Display for Solution {
 }
 
 impl Problem for Journey {
-    type Posibility = Position;
+    type Possibility = Position;
     type Solution = Solution;
 
     fn extend_possibilities(&self, possible_moves: &mut Vec<Position>, _history: &[Position]) {
