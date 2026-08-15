@@ -30,7 +30,12 @@ impl Problem for WordChain {
             self.dictionary
                 .iter()
                 .filter(|w| !history.contains(w))
-                .filter(|w| last_char.is_none_or(|c| w.starts_with(c)))
+                // Deliberately not `Option::is_none_or`: that would raise this package's minimum
+                // supported Rust version to 1.82 for no gain.
+                .filter(|w| match last_char {
+                    Some(c) => w.starts_with(c),
+                    None => true,
+                })
                 .cloned(),
         );
     }
@@ -151,6 +156,25 @@ mod tests {
             Some(vec!["cat".to_string(), "tag".to_string()]),
             problem.is_solution(&["cat".to_string(), "tag".to_string()])
         );
+    }
+
+    /// The whole point of this example is that `parallel_solutions` agrees with `Solutions` for a
+    /// heap-backed (`String`, non-`Copy`) `Possibility`. `main` only cross checks the two counts;
+    /// this pins the stronger property that they yield the same solutions.
+    #[test]
+    fn parallel_search_yields_the_same_chains_as_sequential_search() {
+        let problem = WordChain {
+            dictionary: dictionary(),
+            target_len: 3,
+        };
+
+        let mut sequential: Vec<_> = Solutions::new(problem.clone()).collect();
+        let mut parallel: Vec<_> = parallel_solutions(problem).collect();
+
+        sequential.sort();
+        parallel.sort();
+        assert_eq!(sequential, parallel);
+        assert!(!parallel.is_empty());
     }
 
     #[test]
