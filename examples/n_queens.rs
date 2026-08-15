@@ -20,7 +20,7 @@ impl NQueens {
     }
 }
 
-/// Possition of an individual queen on the board
+/// Position of an individual queen on the board
 #[derive(Clone, Copy)]
 struct QueenAt {
     row: u32,
