@@ -160,6 +160,15 @@ struct Candidate<P> {
 mod tests {
     use super::*;
 
+    /// Shared by every test `Problem` below that models `n` independent binary choices: extend
+    /// with both `false` and `true` until `n` decisions have been made.
+    fn extend_with_binary_choices(possibilities: &mut Vec<bool>, history: &[bool], n: usize) {
+        if history.len() < n {
+            possibilities.push(false);
+            possibilities.push(true);
+        }
+    }
+
     /// Enumerates every binary sequence of length `n`, without any pruning. Used to check that
     /// `Solutions` visits the entire search tree.
     struct BinarySequences {
@@ -171,10 +180,7 @@ mod tests {
         type Solution = Vec<bool>;
 
         fn extend_possibilities(&self, possibilities: &mut Vec<bool>, history: &[bool]) {
-            if history.len() < self.n {
-                possibilities.push(false);
-                possibilities.push(true);
-            }
+            extend_with_binary_choices(possibilities, history, self.n);
         }
 
         fn undo(&mut self, _last: &bool, _history: &[bool]) {}
@@ -286,10 +292,7 @@ mod tests {
         type Solution = i32;
 
         fn extend_possibilities(&self, possibilities: &mut Vec<bool>, history: &[bool]) {
-            if history.len() < self.n {
-                possibilities.push(false);
-                possibilities.push(true);
-            }
+            extend_with_binary_choices(possibilities, history, self.n);
         }
 
         fn undo(&mut self, last: &bool, _history: &[bool]) {

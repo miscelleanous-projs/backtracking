@@ -147,6 +147,17 @@ mod tests {
 
     use super::{Sudoku, WriteDigit};
 
+    /// Writes digits 1..=8 into cells 0..=7 (the first row except its last cell), shared by tests
+    /// that need a partially-filled first row before diverging on the final move.
+    fn fill_first_row_except_last(game: &mut Sudoku) {
+        for index in 0..8 {
+            game.what_if(WriteDigit {
+                index,
+                digit: index + 1,
+            });
+        }
+    }
+
     #[test]
     fn print_empty_sudoku() {
         let mut out = Vec::new();
@@ -171,14 +182,7 @@ mod tests {
     fn print_with_first_row_filled() {
         let mut out = Vec::new();
         let mut game = Sudoku::new();
-        game.what_if(WriteDigit { index: 0, digit: 1 });
-        game.what_if(WriteDigit { index: 1, digit: 2 });
-        game.what_if(WriteDigit { index: 2, digit: 3 });
-        game.what_if(WriteDigit { index: 3, digit: 4 });
-        game.what_if(WriteDigit { index: 4, digit: 5 });
-        game.what_if(WriteDigit { index: 5, digit: 6 });
-        game.what_if(WriteDigit { index: 6, digit: 7 });
-        game.what_if(WriteDigit { index: 7, digit: 8 });
+        fill_first_row_except_last(&mut game);
         game.what_if(WriteDigit { index: 8, digit: 9 });
 
         game.print_to(&mut out).unwrap();
@@ -229,14 +233,7 @@ mod tests {
     #[test]
     fn short_ciruct_if_one_field_has_no_more_possibile_digits() {
         let mut game = Sudoku::new();
-        game.what_if(WriteDigit { index: 0, digit: 1 });
-        game.what_if(WriteDigit { index: 1, digit: 2 });
-        game.what_if(WriteDigit { index: 2, digit: 3 });
-        game.what_if(WriteDigit { index: 3, digit: 4 });
-        game.what_if(WriteDigit { index: 4, digit: 5 });
-        game.what_if(WriteDigit { index: 5, digit: 6 });
-        game.what_if(WriteDigit { index: 6, digit: 7 });
-        game.what_if(WriteDigit { index: 7, digit: 8 });
+        fill_first_row_except_last(&mut game);
         game.what_if(WriteDigit {
             index: 9 + 8,
             digit: 9,
