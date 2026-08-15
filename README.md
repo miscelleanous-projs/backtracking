@@ -18,8 +18,10 @@ backward-compatible extensions to the `Problem`/`Solutions` API:
   `Clone`, so existing implementations are unaffected; the weaker bound additionally allows
   heap-backed decision types (an owned `String`, a `Vec`, ...) without forcing them through an
   artificial handle/index indirection just to satisfy the trait.
-- **An opt-in `parallel` feature adds `parallel_solutions`.** It searches the independent branches
-  rooted at each top-level possibility in parallel (via `rayon`), with each branch still walked
-  sequentially by an ordinary `Solutions` iterator on its own thread. The extra `Clone + Send +
-  Sync` bounds only apply at that new call site — `Solutions::new` and its bounds are untouched,
-  and the `rayon` dependency is not compiled unless the feature is enabled.
+- **An opt-in, experimental `parallel` feature adds `parallel_solutions`.** It searches the
+  independent branches rooted at each top-level possibility in parallel (via `rayon`), with each
+  branch still walked sequentially by an ordinary `Solutions` iterator on its own thread. The extra
+  `Clone + Send + Sync` bounds only apply at that new call site — `Solutions::new` and its bounds
+  are untouched, and the `rayon` dependency is not compiled unless the feature is enabled. Newer
+  and less exercised than the core API (no bundled example uses it yet); its shape may still
+  change in a minor version.

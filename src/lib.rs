@@ -96,13 +96,16 @@ impl<G: Problem> Solutions<G> {
     }
 }
 
-/// Explores the independent branches rooted at each of the initial possibilities of `init` in
-/// parallel, each branch searched sequentially by an ordinary [`Solutions`] iterator on its own
-/// thread. Requires the `parallel` feature.
+/// **Experimental.** Explores the independent branches rooted at each of the initial
+/// possibilities of `init` in parallel, each branch searched sequentially by an ordinary
+/// [`Solutions`] iterator on its own thread. Requires the `parallel` feature.
 ///
 /// This only requires [`Clone`] on `P` (to fork one problem instance per root branch) and
 /// [`Send`] bounds (to move those instances across threads); it does not change [`Problem`] or
 /// [`Solutions`] in any way, so it is purely additive to the crate's API.
+///
+/// Unlike the core [`Problem`]/[`Solutions`] API, this entry point is newer, isn't exercised by
+/// any of the bundled examples, and its API shape may still change in a minor version bump.
 #[cfg(feature = "parallel")]
 pub fn parallel_solutions<P>(init: P) -> impl rayon::iter::ParallelIterator<Item = P::Solution>
 where
