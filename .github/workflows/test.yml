@@ -1,0 +1,17 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run tests
+      run: cargo test --verbose
+    - name: Run knights-journey
+      run: cargo run --example knights_journey --release
+    - name: Run sudoku
+      run: cargo run --example sudoku --release
